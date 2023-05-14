@@ -13,7 +13,7 @@ public class GameManager : MonoBehaviour
     float hitCombo_MaxTime = 2f;
 
     //... 플레이어 상태 관련
-    public GameObject player;
+    public PlayerController player;
     public float playerHealth;
 
     // 현재 무기 이름
@@ -41,7 +41,7 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         current_WeaponName = "sword";
-        current_Weapon = weaponDic.GetWeaponValue(current_WeaponName);
+        // current_Weapon = weaponDic.GetWeaponValue(current_WeaponName);
 
         // 최대 스킬 포인트 및 현재 스킬 포인트 초기화
         max_SkillPoint = 8;
@@ -51,37 +51,37 @@ public class GameManager : MonoBehaviour
     private void Update()
     {
         //무기 교체
-        Change_Weapon();
+        //Change_Weapon();
 
         // 콤보 타이머 시작
-        if (hitCombo_TimerOn == true) 
+        if (hitCombo_TimerOn == true)
         {
             // 타이머 증가
             hitCombo_Time += Time.deltaTime;
             // 제한 시간을 초과하면 콤보 타이머 종료
-            if (hitCombo_Time >= hitCombo_MaxTime) 
+            if (hitCombo_Time >= hitCombo_MaxTime)
             {
-                EndComboTimer(); 
+                EndComboTimer();
             }
         }
     }
 
     // 콤보 시작 함수
-    public void StartComboTimer() 
+    public void StartComboTimer()
     {
         hitCombo_TimerOn = true;
         hitCombo_Time = 0f;
     }
     // 콤보 종료 함수
-    public void EndComboTimer() 
+    public void EndComboTimer()
     {
         hitCombo_TimerOn = false;
         hitCombo_Time = 0f;
         hitCombo_Num = 0;
     }
 
-        // 플레이어 스탯 저장
-        public float GetPlayerStats()
+    // 플레이어 스탯 저장
+    public float GetPlayerStats()
     {
         return playerHealth;
     }
@@ -89,7 +89,7 @@ public class GameManager : MonoBehaviour
     {
         playerHealth = value;
     }
-    
+
     // 스킬 포인트 업데이트
     public void Set_Skill_Point(int point)
     {
@@ -97,6 +97,8 @@ public class GameManager : MonoBehaviour
         current_SkillPoint += point;
         stats.Update_Skill_Points(point * -1);
     }
+}
+    /*
     void Change_Weapon()
     {
         if (Input.GetKeyDown(KeyCode.Z))
@@ -129,7 +131,6 @@ public class GameManager : MonoBehaviour
     }
 
 }
-/*
 if (current_SkillPoint <= 0)
 {
     current_SkillPoint = 0;

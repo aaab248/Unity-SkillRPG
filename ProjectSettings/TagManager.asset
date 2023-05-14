@@ -11,6 +11,7 @@ TagManager:
   - Ladder
   - Platform
   - Enemy
+  - Box
   layers:
   - Default
   - TransparentFX
@@ -20,7 +21,7 @@ TagManager:
   - UI
   - Item
   - Player
-  - Enemy
+  - CanHit
   - 
   - 
   - 

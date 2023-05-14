@@ -47,6 +47,7 @@ public class PlayerController : MonoBehaviour
     {
         input_Vec.x = Input.GetAxisRaw("Horizontal");
 
+        // 이동 및 점프 애니메이션 값 전달
         anime.SetFloat("X", Mathf.Abs(input_Vec.x));
         anime.SetFloat("Y", rigid.velocity.y);
 
@@ -84,7 +85,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void Flip()
+    void Flip() // 좌우 바라보는 방향에 따라
     {
         if (input_Vec.x < 0)
         {
@@ -102,6 +103,10 @@ public class PlayerController : MonoBehaviour
                 child.localPosition = new Vector3(0.75f, 0f, 0f);
             }
         }
+    }
+    // 플레이어 대쉬
+    void Player_Dash()
+    {
     }
 
     // 플레이어 이동
@@ -148,8 +153,7 @@ public class PlayerController : MonoBehaviour
         if (collision.gameObject.layer == LayerMask.NameToLayer("Ground"))
         {
             anime.SetBool("Fall", false);
-
-            StartCoroutine(JumpDelay());
+            canJump = true;
         }
 
         if (collision.gameObject.CompareTag("Enemy"))
@@ -164,11 +168,7 @@ public class PlayerController : MonoBehaviour
             Player_TakeDamage(EnemyInfo.attack_Dmg);
         }
     }
-    IEnumerator JumpDelay()
-    {
-        yield return new WaitForSeconds(0.1f);
-        canJump = true;
-    }
+
 
     void Player_TakeDamage(float damage)
     {
