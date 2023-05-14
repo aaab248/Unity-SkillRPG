@@ -2,10 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class StatsUI : MonoBehaviour
 {
     public GameObject[] skill_Points_Images;
+
+    public TMP_Text combo_Text;
 
     // 스킬 포인트 UI 
     Stack<GameObject> point_Stacks;
@@ -27,6 +30,19 @@ public class StatsUI : MonoBehaviour
         {
             skill_Points_Images[j].SetActive(false);
             disable_Point_Stacks.Push(skill_Points_Images[j]);
+        }
+    }
+    private void Update()
+    {
+        // hitCombo UI 갱신
+        if(GameManager.instance.hitCombo_TimerOn == true)
+        {
+            combo_Text.gameObject.SetActive(true);
+            combo_Text.text = "Hit" + GameManager.instance.hitCombo_Num;
+        }
+        else
+        {
+            combo_Text.gameObject.SetActive(false);
         }
     }
 

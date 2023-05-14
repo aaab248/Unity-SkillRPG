@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 4597122871092476702}
   - component: {fileID: 4597122871092476701}
   m_Layer: 8
-  m_Name: Enemy (1)
+  m_Name: BlueSlime
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -123,9 +123,9 @@ CapsuleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
-  m_Size: {x: 1, y: 1}
-  m_Direction: 0
+  m_Offset: {x: -0.000000018084123, y: -0.15170063}
+  m_Size: {x: 1.1, y: 0.6188052}
+  m_Direction: 1
 --- !u!95 &4597122871092476703
 Animator:
   serializedVersion: 5
@@ -163,6 +163,7 @@ MonoBehaviour:
   max_Hp: 5
   current_Hp: 5
   attack_Dmg: 3
+  attack_KnockBack: 5
   attack_Speed: 3
   move_Speed: 1
   FOV: 5

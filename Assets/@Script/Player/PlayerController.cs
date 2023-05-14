@@ -8,12 +8,12 @@ public class PlayerController : MonoBehaviour
     SpriteRenderer sprite;
     Animator anime;
 
-    public PlayerAttack attack;
     public Transform[] childs;
 
     [Header("--------[ Health ]")]
     public float maxHealth;
     public float currentHealth;
+    public bool isHit = false;
 
     [Header("--------[ Move ]")]
     public Vector2 input_Vec;
@@ -25,13 +25,13 @@ public class PlayerController : MonoBehaviour
     public float jumpPower;
     public float jumpTime;
     public float max_JumpTime;
-    public bool is_Jump;
+    public bool canJump = true;
 
     private void Awake()
     {
         rigid = GetComponent<Rigidbody2D>();
         sprite = GetComponent<SpriteRenderer>();
-        // anime = GetComponent<Animator>();
+        anime = GetComponent<Animator>();
     }
 
     private void Start()
@@ -47,37 +47,41 @@ public class PlayerController : MonoBehaviour
     {
         input_Vec.x = Input.GetAxisRaw("Horizontal");
 
+        anime.SetFloat("X", Mathf.Abs(input_Vec.x));
+        anime.SetFloat("Y", rigid.velocity.y);
 
+        if(rigid.velocity.y < -0.1f)
+        {
+            anime.SetBool("Fall", true);
+        }
 
         // 자신 및 자식 스프라이트 filp x , 자식 로컬포지션 반대로
-        Flip();
+        if(canMove == true)
+        {
+            Flip();
+        }
 
         // Space 키입력 제거 및 최대 점프시간 초과
-        if (Input.GetKeyUp(KeyCode.Space) || jumpTime > max_JumpTime)
+        if(Input.GetKeyUp(KeyCode.Space) || jumpTime > max_JumpTime)
         {
-            is_Jump = true;
+            canJump = false;
             jumpTime = 0f;
         }
 
         // 좌우 이동 키 입력 제거시 속도제어
         if (Input.GetButtonUp("Horizontal"))
         {
-            rigid.velocity = new Vector2(rigid.velocity.normalized.x * 0.3f, rigid.velocity.y);
+            rigid.velocity = new Vector2(rigid.velocity.normalized.x * 0.1f, rigid.velocity.y);
         }
     }
 
     private void FixedUpdate()
     {
-        if(canMove == true)
+        if (canMove == true)
         {
             Player_Move();
             Player_Jump();
         }
-    }
-
-    public void AttackAnimeEnd()
-    {
-        canMove = true;
     }
 
     void Flip()
@@ -87,8 +91,7 @@ public class PlayerController : MonoBehaviour
             sprite.flipX = true;
             foreach (Transform child in childs)
             {
-                child.GetComponent<SpriteRenderer>().flipX = true;
-                child.localPosition = new Vector3(-1f, 0f, 0f);
+                child.localPosition = new Vector3(-0.75f, 0f, 0f);
             }
         }
         else if (input_Vec.x > 0)
@@ -96,8 +99,7 @@ public class PlayerController : MonoBehaviour
             sprite.flipX = false;
             foreach (Transform child in childs)
             {
-                child.GetComponent<SpriteRenderer>().flipX = false;
-                child.localPosition = new Vector3(1f, 0f, 0f);
+                child.localPosition = new Vector3(0.75f, 0f, 0f);
             }
         }
     }
@@ -105,11 +107,9 @@ public class PlayerController : MonoBehaviour
     // 플레이어 이동
     private void Player_Move()
     {
-        float h;
-        h = input_Vec.x;
 
         //addforce 이용
-        rigid.AddForce(Vector2.right * h * movePower, ForceMode2D.Force);
+        rigid.AddForce(Vector2.right * input_Vec.x * movePower, ForceMode2D.Force);
         if(rigid.velocity.x > maxSpeed)
         {
             rigid.velocity = new Vector2(maxSpeed, rigid.velocity.y);
@@ -124,44 +124,126 @@ public class PlayerController : MonoBehaviour
     {
         if(Input.GetKey(KeyCode.Space))
         {
-            if (is_Jump)
+
+            if (canJump == false)
             {
                 return;
             }
+
             rigid.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
+
+            anime.SetTrigger("JumpTrigger");
+
             // 점프 시간 계산
             jumpTime += Time.deltaTime;
         }     
+    }
+    public void FallAnimeStart()
+    {
+        anime.SetBool("Fall", true);
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.layer == LayerMask.NameToLayer("Ground"))
         {
+            anime.SetBool("Fall", false);
+
             StartCoroutine(JumpDelay());
+        }
+
+        if (collision.gameObject.CompareTag("Enemy"))
+        {
+            // 플레이어 기준으로 적의 위치가 왼쪽, 오른쪽 확인
+            int dirVec_X = transform.position.x > collision.transform.position.x ? 1 : -1;
+            // 적 정보 확인
+            Enemy EnemyInfo = collision.gameObject.GetComponent<Enemy>();
+
+            // 적 정보에 따라 넉백 및 플레이어 피격 데미지
+            rigid.AddForce(new Vector2(dirVec_X, 5f).normalized * EnemyInfo.attack_KnockBack, ForceMode2D.Impulse);
+            Player_TakeDamage(EnemyInfo.attack_Dmg);
         }
     }
     IEnumerator JumpDelay()
     {
         yield return new WaitForSeconds(0.1f);
-        is_Jump = false;
+        canJump = true;
     }
 
     void Player_TakeDamage(float damage)
     {
-        currentHealth -= damage;
-        GameManager.instance.SetPlayerStats(currentHealth);
+        if(isHit)
+        {
+            return;
+        }
 
-        if(currentHealth < 0)
+        AttackEnd();
+
+        currentHealth -= damage;
+
+        if (currentHealth <= 0)
         {
             Player_Die();
+            return;
         }
+
+        isHit = true;
+        canMove = false;
+
+        anime.SetTrigger("HitTrigger");
+        anime.SetBool("IsHit", true);
+
+        GameManager.instance.SetPlayerStats(currentHealth);
     }
+
+    void HitAnimationEnd()
+    {
+        anime.SetBool("IsHit", false);
+        isHit = false;
+        canMove = true;
+    }
+
+
 
     void Player_Die()
     {
+        anime.SetTrigger("Death");
+
+        // 콜라이더 및 rigid simulated, 스크립트 비활성화
+        rigid.simulated = false;
+        transform.GetComponent<Collider2D>().enabled = false;
+        transform.GetComponent<PlayerController>().enabled = false;
+        // 자식 오브젝트 비활성화
+        foreach (Transform child in childs)
+        {
+            child.gameObject.SetActive(false);
+        }
         // ... 캐릭터 애니메이션 재생
         // ... 캐릭터 관련 컴포넌트 제거
         // ... ui 관련 스크립트로 새로 시작 확인 창 생성 -> 마을 맵 씬 전환
+    }
+
+
+
+    // 공격 애니메이션 종료시 호출
+    void AttackAnimationEnd()
+    {
+        StartCoroutine(AttackAnimationEndCor());
+    }
+    IEnumerator AttackAnimationEndCor()
+    {
+        yield return new WaitForSeconds(0.01f);
+        AttackEnd();
+    }
+    
+    // 공격이 끝날 때 호출 ( 애니메이션 종료, 플레이어 피격 시)
+    void AttackEnd()
+    {
+        canMove = true;
+        canJump = true;
+
+        childs[0].GetComponent<PlayerAttack>().is_Attack = false;
+        childs[0].GetComponent<PlayerAttack>().Enemies.Clear(); // 리스트 삭제
+        anime.SetBool("Attack", false);
     }
 }

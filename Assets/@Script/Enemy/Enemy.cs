@@ -5,11 +5,16 @@ using UnityEngine;
 public class Enemy : MonoBehaviour
 {
     public string enemy_Name;
+
     public int max_Hp;
     public float current_Hp;
-    public int attack_Dmg;
+
+    public float attack_Dmg;
+    public float attack_KnockBack;
     public float attack_Speed;
+
     public float move_Speed;
+
     public float FOV;
 
     // enemy 피격 시 이동 불가능

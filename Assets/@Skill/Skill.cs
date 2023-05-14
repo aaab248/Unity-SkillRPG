@@ -6,6 +6,10 @@ public class Skill : MonoBehaviour
 {
     public string skill_Type;
 
+    // 스킬 쿨타임 관련
+    public float cooltime;
+    public bool isCooldown = false;
+
     public int damage; // 스킬 데미지
     public float knockbackForce; // 넉백 힘
     public float duration; // 몬스터 피격시 이동불가 지속 시간

@@ -6,6 +6,12 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager instance = null;
 
+    public int hitCombo_Num = 0;
+    public bool hitCombo_TimerOn = false;
+
+    float hitCombo_Time = 0f;
+    float hitCombo_MaxTime = 2f;
+
     //... 플레이어 상태 관련
     public GameObject player;
     public float playerHealth;
@@ -46,10 +52,36 @@ public class GameManager : MonoBehaviour
     {
         //무기 교체
         Change_Weapon();
+
+        // 콤보 타이머 시작
+        if (hitCombo_TimerOn == true) 
+        {
+            // 타이머 증가
+            hitCombo_Time += Time.deltaTime;
+            // 제한 시간을 초과하면 콤보 타이머 종료
+            if (hitCombo_Time >= hitCombo_MaxTime) 
+            {
+                EndComboTimer(); 
+            }
+        }
     }
 
-    // 플레이어 스탯 저장
-    public float GetPlayerStats()
+    // 콤보 시작 함수
+    public void StartComboTimer() 
+    {
+        hitCombo_TimerOn = true;
+        hitCombo_Time = 0f;
+    }
+    // 콤보 종료 함수
+    public void EndComboTimer() 
+    {
+        hitCombo_TimerOn = false;
+        hitCombo_Time = 0f;
+        hitCombo_Num = 0;
+    }
+
+        // 플레이어 스탯 저장
+        public float GetPlayerStats()
     {
         return playerHealth;
     }
