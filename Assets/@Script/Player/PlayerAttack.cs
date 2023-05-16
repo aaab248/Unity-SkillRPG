@@ -90,6 +90,7 @@ public class PlayerAttack : MonoBehaviour
         {
             switch(hit_Object.tag)
             {
+                // 적 오브젝트 공격
                 case "Enemy":
 
                     Enemy enemyScript = hit_Object.GetComponent<Enemy>();
@@ -109,14 +110,13 @@ public class PlayerAttack : MonoBehaviour
                         GameManager.instance.StartComboTimer();
                         GameManager.instance.hitCombo_Num++;
                     }
-
                     break;
 
+                // 박스 오브젝트 공격
                 case "Box":
 
                     Box boxScript = hit_Object.GetComponent<Box>();
                     boxScript.Box_Damaged();
-
                     break;
             }
 

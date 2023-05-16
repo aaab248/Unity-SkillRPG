@@ -150,10 +150,18 @@ public class PlayerController : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        // 땅에 착지
         if (collision.gameObject.layer == LayerMask.NameToLayer("Ground"))
         {
             anime.SetBool("Fall", false);
+            anime.SetBool("WallSlide", false);
+
             canJump = true;
+        }
+        // 벽에 붙었을 때 애니메이션 시작 및 점프 초기화
+        if (collision.gameObject.layer == LayerMask.NameToLayer("Wall"))
+        {
+            anime.SetBool("WallSlide", true);
         }
 
         if (collision.gameObject.CompareTag("Enemy"))
@@ -168,7 +176,31 @@ public class PlayerController : MonoBehaviour
             Player_TakeDamage(EnemyInfo.attack_Dmg);
         }
     }
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        if (collision.gameObject.layer == LayerMask.NameToLayer("Wall"))
+        {
+            anime.SetBool("WallSlide", false);
+        }
+    }
 
+    // ... 사다리 Test
+    private void OnTriggerStay2D (Collider2D collision)
+    {
+        if(collision.gameObject.CompareTag("ladder"))
+        {
+            float h = Input.GetAxis("Vertical");
+            if(h != 0)
+            {
+                rigid.gravityScale = 0;
+                transform.Translate(new Vector2(transform.position.x, transform.position.y + h * 0.1f));
+            }
+            else
+            {
+                rigid.gravityScale = 3;
+            }
+        }
+    }
 
     void Player_TakeDamage(float damage)
     {
